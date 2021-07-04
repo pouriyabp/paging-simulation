@@ -165,12 +165,12 @@ def calculate_memory_process(list_of_process, result_scheduling, whole_time, ram
 
         # calculate function are in ram
         # ==============================================================================================================
-        # # remove process that are finished (not in temp list or waiting list)
-        # for process in list_of_process:
-        #     if process not in temp_list:
-        #         for i in range(len(ram.arr_of_frames)):
-        #             if ram.arr_of_frames[i] in process.splitProcess:
-        #                 ram.arr_of_frames[i] = None
+        # remove process that are finished (not in temp list or waiting list)
+        for process in list_of_process:
+            if process not in temp_list:
+                for i in range(len(ram.arr_of_frames)):
+                    if ram.arr_of_frames[i] in process.splitProcess:
+                        ram.arr_of_frames[i] = None
         # ==============================================================================================================
         list_of_process_in_the_hard = []
         # put chunk of process must be in ram
@@ -221,6 +221,22 @@ def calculate_memory_process(list_of_process, result_scheduling, whole_time, ram
                                 if ram.arr_of_frames[i] in process.splitProcess:
                                     ram.arr_of_frames[i] = None
         # ==============================================================================================================
+        # import process that are in temp list and can go in to the memory
+        remain_free_size = 0
+        temp_list2 = list(temp_list)
+        if process_in_cpu is not None:
+            temp_list2.remove(process_in_cpu)
+        for i in range(len(ram.arr_of_frames)):
+            if ram.arr_of_frames[i] is None:
+                remain_free_size += 1
+        for process in temp_list2:
+            if process.size / process.frameSize <= remain_free_size:
+                for chunk in process.splitProcess:
+                    for i in range(len(ram.arr_of_frames)):
+                        if ram.arr_of_frames[i] is None:
+                            ram.arr_of_frames[i] = chunk
+                            break
+        # ==============================================================================================================
         for process in list_of_process:
             ram.crating_paging_table(process)
             temp_dict = process.processPagingTable
@@ -231,7 +247,7 @@ def calculate_memory_process(list_of_process, result_scheduling, whole_time, ram
         print(ram)
 
 
-ram = Ram(20, 2)
+ram = Ram(16, 2)
 process1 = Process("process1", 1, 5, 6, 16)
 process2 = Process("process2", 2, 4, 5, 4)
 process3 = Process("process3", 4, 8, 10, 8)
