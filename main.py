@@ -15,6 +15,7 @@ class Process:
         self.priority = 0  # set process priority
         self.frameSize = -1
         self.splitProcess = []
+        self.processPagingTable = {}
 
     def get_frame_size(self, frame_size):
         self.frameSize = frame_size
@@ -55,11 +56,24 @@ class Ram:
         return arr_of_frames
 
     def __repr__(self):
+        print(" ")
+        print("============RAM============")
         text = "-----------------------\n"
         for n in self.arr_of_frames:
             text += "|" + str(n) + "|\n"
             text += "-----------------------\n"
         return text
+
+    def crating_paging_table(self, process):
+        process_dict = {}
+        for i in range(len(self.arr_of_frames)):
+            if self.arr_of_frames[i] is not None:
+                chunk_name = self.arr_of_frames[i]
+                edit = self.arr_of_frames[i]
+                edit = edit.split("-")
+                if edit[0] == process.name:
+                    process_dict[chunk_name] = i
+        process.processPagingTable = process_dict
 
 
 def lcm(x, y):
@@ -207,7 +221,13 @@ def calculate_memory_process(list_of_process, result_scheduling, whole_time, ram
                                 if ram.arr_of_frames[i] in process.splitProcess:
                                     ram.arr_of_frames[i] = None
         # ==============================================================================================================
-
+        for process in list_of_process:
+            ram.crating_paging_table(process)
+            temp_dict = process.processPagingTable
+            if len(temp_dict) > 0:
+                print(f"*** {process} paging table ***")
+                for key, value in temp_dict.items():
+                    print(key, ' : ', value)
         print(ram)
 
 
@@ -218,9 +238,6 @@ process3 = Process("process3", 4, 8, 10, 8)
 list_of_process = [process1, process2, process3]
 
 set_frame_size(list_of_process, ram)
-print(process1.splitProcess)
-print(process2.splitProcess)
-print(process3.splitProcess)
 max_time = calculate_whole_time(list_of_process)
 print(f"max time is {max_time}")
 result_scheduling = earliest_deadline_first(list_of_process, max_time)
